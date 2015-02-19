@@ -82,7 +82,10 @@ def starter(done_jobs, submits):
             print '\tSubmitting to main: %s' % converted_name
             job_submitter(converted_name, 'sbinlab')
             submitted_jobs += 1
-    else:
+    else:  # in case everything's running already
+
+        print "hey"
+
         print '\n\tNothing to start on main partition\n'
     max_jobs = 4
     for submit_file in submits:
