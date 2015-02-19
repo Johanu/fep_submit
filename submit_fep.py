@@ -5,13 +5,15 @@ import re
 import os
 from optparse import OptionParser
 
+
 def natural_key(string_):
     """See http://www.codinghorror.com/blog/archives/001018.html"""
     return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
 
 
 def read_queue():
-    '''Reads the queue, returns running processes and number in que for each partition'''
+    '''Reads the queue, returns running processes and number in
+    que for each partition'''
     processes = []
     procs_main = []
     procs_ib = []
@@ -23,13 +25,16 @@ def read_queue():
         datum = line.split()
         if index > 0 and datum[4] == 'RUNNING' and datum[2][:8] == 'fep_test':
             processes.append(datum[2])
-        if (index > 0 and datum[1] == 'sbinlab' and (datum[4] == 'RUNNING' or datum[4] == 'PENDING') and
+        if (index > 0 and datum[1] == 'sbinlab' and (datum[4] == 'RUNNING' or
+            datum[4] == 'PENDING') and
                 datum[2][:8] == 'fep_test'):
             procs_main.append(datum[2])
-        elif (index > 0 and datum[1] == 'sbinlab_i'and (datum[4] == 'RUNNING' or datum[4] == 'PENDING') and
+        elif (index > 0 and datum[1] == 'sbinlab_i'and
+              (datum[4] == 'RUNNING' or datum[4] == 'PENDING') and
                 datum[2][:8] == 'fep_test'):
             procs_ib.append(datum[2])
-        if (index > 0 and (datum[4] == 'RUNNING' or datum[4] == 'PENDING') and datum[2][:8] == 'fep_test'):
+        if (index > 0 and (datum[4] == 'RUNNING' or datum[4] == 'PENDING') and
+                datum[2][:8] == 'fep_test'):
             numbers.append(int(datum[2].split('.')[1]))
     return processes, procs_main, procs_ib, numbers
 
@@ -50,11 +55,13 @@ def check_if_success(jobname):
 def job_submitter(jobname, partition):
     '''Submits ill-terminated jobs'''
     if partition is 'sbinlab':
-        process = subprocess.Popen('sbatch --partition sbinlab submit_job_' + jobname.split('.')[1], shell=True,
+        process = subprocess.Popen('sbatch --partition sbinlab submit_job_' +
+                                   jobname.split('.')[1], shell=True,
                                    stdout=subprocess.PIPE)
         process.wait()
     elif partition is 'sbinlab_ib':
-        process = subprocess.Popen('sbatch --partition sbinlab_ib submit_job_' + jobname.split('.')[1], shell=True,
+        process = subprocess.Popen('sbatch --partition sbinlab_ib submit_job_'
+                                   + jobname.split('.')[1], shell=True,
                                    stdout=subprocess.PIPE)
         process.wait()
 
@@ -97,12 +104,16 @@ def starter(done_jobs, submits):
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option("-c", "--check", action='store_true', dest='check_only', default=False)
+    parser.add_option("-c", "--check",
+                      action='store_true',
+                      dest='check_only',
+                      default=False)
     (options, args) = parser.parse_args()
     submits = sorted(glob.glob('submit_job_*'), key=natural_key)
     print '\n\n\t\tFEP RUNNER 3000\n\n\nThis script will check or run %d files.' % len(submits)
     done_jobs = []
-    print '\nStart time is: %s' % time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
+    print '\nStart time is: %s' % time.strftime("%a, %d %b %Y %H:%M:%S",
+                                                time.localtime())
     print '\nChecking for previously finished steps:\n'
     for submit_file in submits:
         try:
@@ -138,7 +149,7 @@ if __name__ == '__main__':
                     success = check_if_success(job)
                     if success is False:
                         if job in procs_main_old:
-                            print '\t%s failed on main partition at %s, resubmiting.' %(job, time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()))
+                            print '\t%s failed on main partition at %s, resubmiting.' % (job, time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()))
                             job_submitter(job, 'sbinlab')
                         elif job in procs_ib_old:
                             print '\t%s failed on IB partition at %s, resubmiting.' % (job, time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()))
