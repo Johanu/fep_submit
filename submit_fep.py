@@ -64,6 +64,11 @@ def job_submitter(jobname, partition):
                                    + jobname.split('.')[1], shell=True,
                                    stdout=subprocess.PIPE)
         process.wait()
+    elif options.dtu:
+        process = subprocess.Popen('msub '
+                                   + jobname, shell=True,
+                                   stdout=subprocess.PIPE)
+        process.wait()
 
 
 def starter(done_jobs, submits):
@@ -108,6 +113,10 @@ if __name__ == '__main__':
                       action='store_true',
                       dest='check_only',
                       default=False)
+    parser.add_option("-d", "--dtu",
+                      action='store_true',
+                      dest='dtu',
+                      default=False)
     (options, args) = parser.parse_args()
     submits = sorted(glob.glob('submit_job_*'), key=natural_key)
     print '\n\n\t\tFEP RUNNER 3000\n\n\nThis script will check or run %d files.' % len(submits)
@@ -129,6 +138,11 @@ if __name__ == '__main__':
             continue
     if options.check_only:
         exit()
+    if options.dtu:
+        for submit_file in submits:
+           job_submitter(submit_file, 'dtu')
+	   print '\tSubmitting to main: %s' % submit_file
+        exit()   
     else:
         starter(done_jobs, submits)
         starttime = time.time()
